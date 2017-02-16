@@ -16,9 +16,9 @@ ToDo:
 
 ---
 
-### ... and some teaks for Lazarus.
+### ... and some tweaks for Lazarus.
 
-Lazarus does not support anonymous functions. so I just change it to callbacks.
+Lazarus does not support anonymous functions, so I just change it to callbacks.
 This code is very dirty and terrible. You should use it at your own risk.
 
 Generic problem simply solved by "[FreePascal Generics.Collections library](https://github.com/dathox/generics.collections)".
