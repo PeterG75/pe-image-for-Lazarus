@@ -16,7 +16,7 @@ ToDo:
 
 ---
 
-### ... and teaks for Lazarus.
+### ... and some teaks for Lazarus.
 
 Lazarus does not support anonymous functions. so I just change it to callbacks.
 This code is very dirty and terrible. You should use it at your own risk.
@@ -24,5 +24,5 @@ This code is very dirty and terrible. You should use it at your own risk.
 Generic problem simply solved by "[FreePascal Generics.Collections library](https://github.com/dathox/generics.collections)".
 (Thank's for it.)
 
-And also you need "TlHelp32.pas" and "PsAPI.pas" units for build it in Lazarus.
-Copy them from Delphi src folder.
+You also need "TlHelp32.pas" and "PsAPI.pas" units for build it in Lazarus.
+Copy them from Delphi's src folder.
