@@ -7,8 +7,8 @@ interface
 
 
 uses
-  System.Classes,
-  System.SysUtils,
+  Classes,
+  SysUtils,
 
   PE.Common;
 
@@ -268,9 +268,20 @@ end;
 
 function ReplaceSpecialSymobls(const source: string): string;
 begin
+  // oranke. modified.
+  Result :=
+    SysUtils.StringReplace(
+      SysUtils.StringReplace(source, #10, '\n', [rfReplaceAll]),
+      #13, '\r', [rfReplaceAll]
+    );
+
+
+
+  {
   Result := source.
     Replace(#10, '\n').
     Replace(#13, '\r');
+  }
 end;
 
 end.

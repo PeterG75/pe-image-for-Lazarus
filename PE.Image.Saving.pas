@@ -4,8 +4,8 @@ unit PE.Image.Saving;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils;
+  Classes,
+  SysUtils;
 
 // If SavingModifiedImage is True some fields like header size and image size
 // are recalculated and updated. If it's False it's assumed image is already

@@ -3,7 +3,7 @@ unit PE.RTTI;
 interface
 
 uses
-  System.Classes;
+  Classes;
 
 type
   TRecordFieldDesc = record

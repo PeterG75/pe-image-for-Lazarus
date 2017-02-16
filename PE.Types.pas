@@ -3,7 +3,7 @@ unit PE.Types;
 interface
 
 uses
-  System.Generics.Collections,
+  Generics.Collections,
   PE.Common;
 
 type

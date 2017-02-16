@@ -3,7 +3,7 @@ unit PE.Parser.TLS;
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
 
   PE.Common,
   PE.Types,

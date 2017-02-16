@@ -3,7 +3,7 @@ unit PE.Build.Common;
 interface
 
 uses
-  System.Classes,
+  Classes,
   PE.Common,
   PE.Image,
   NullStream;

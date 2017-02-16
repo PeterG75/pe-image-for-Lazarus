@@ -3,11 +3,13 @@ unit WinHelper;
 interface
 
 uses
-  System.Generics.Collections,
-  System.SysUtils,
+  Generics.Collections,
+  SysUtils,
 
-  WinApi.TlHelp32,
-  WinApi.Windows;
+  PE.Common,
+
+  TlHelp32,
+  Windows;
 
 type
   TProcessRec = record
@@ -23,11 +25,14 @@ type
   TModuleRecList = TList<TModuleRec>;
 
   // return True to continue enumeration or False to stop it.
-  TEnumProcessesCallback = reference to function(const pe: TProcessEntry32): boolean;
-  TEnumModulesCallback = reference to function(const me: TModuleEntry32): boolean;
+  //TEnumProcessesCallback = reference to function(const pe: TProcessEntry32): boolean;
+  //TEnumModulesCallback = reference to function(const me: TModuleEntry32): boolean;
+  // oranke modified
+  TEnumProcessesCallback = function(const pe: TProcessEntry32; UserData: Pointer): boolean;
+  TEnumModulesCallback = function(const me: TModuleEntry32; UserData: Pointer): boolean;
 
   // Enumerate processes with callback. Result is False if there was error.
-function EnumProcesses(cb: TEnumProcessesCallback): boolean;
+function EnumProcesses(cb: TEnumProcessesCallback; UserData: Pointer): boolean;
 
 // Enumerate processes to list. Result is False if there was error.
 function EnumProcessesToList(List: TProcessRecList): boolean;
@@ -47,7 +52,7 @@ function FindPIDByProcessName(
   Match: TStringMatchKind = MATCH_STRING_WHOLE): boolean;
 
 // Enumerate modules with callback. Result is False if there was error.
-function EnumModules(PID: DWORD; cb: TEnumModulesCallback): boolean;
+function EnumModules(PID: DWORD; cb: TEnumModulesCallback; UserData: Pointer): boolean;
 
 // Enumerate modules to list. Result is False if there was error.
 function EnumModulesToList(PID: DWORD; List: TModuleRecList): boolean;
@@ -55,10 +60,12 @@ function EnumModulesToList(PID: DWORD; List: TModuleRecList): boolean;
 type
   // Used in FindModule to test if this is the module we search.
   // Return True on match.
-  TFindModuleChecker = reference to function(const me: TModuleEntry32): boolean;
+  //TFindModuleChecker = reference to function(const me: TModuleEntry32): boolean;
+  // oranke modified
+  TFindModuleChecker = function(const me: TModuleEntry32; UserData: Pointer): boolean;
 
   // Find module by custom condition.
-function FindModule(PID: DWORD; out value: TModuleEntry32; Checker: TFindModuleChecker): boolean;
+function FindModule(PID: DWORD; out value: TModuleEntry32; Checker: TFindModuleChecker; UserData: Pointer): boolean;
 
 // Find module by address that belongs to this module.
 function FindModuleByAddress(PID: DWORD; Addr: NativeUInt; out me: TModuleEntry32): boolean;
@@ -75,7 +82,8 @@ function SetDebugPrivilege(State: boolean): boolean;
 
 implementation
 
-function EnumProcesses(cb: TEnumProcessesCallback): boolean;
+
+function EnumProcesses(cb: TEnumProcessesCallback; UserData: Pointer): boolean;
 var
   hShot, hShotMod: THandle;
   pe: TProcessEntry32;
@@ -99,7 +107,7 @@ begin
       if hShotMod <> INVALID_HANDLE_VALUE then
       begin
         CloseHandle(hShotMod);
-        if not cb(pe) then
+        if not cb(pe, UserData) then
           break;
       end;
     until not Process32Next(hShot, pe);
@@ -110,41 +118,83 @@ begin
   end;
 end;
 
+function EnumProcessProc(const pe: TProcessEntry32; UserData: Pointer): boolean;
+begin
+  //List.Add(TProcessRec.Create(pe.th32ProcessID, pe.szExeFile));
+  TProcessRecList(UserData).Add(TProcessRec.Create(pe.th32ProcessID, pe.szExeFile));
+
+  result := True;
+end;
+
 function EnumProcessesToList(List: TProcessRecList): boolean;
 begin
   List.Clear;
+  result := EnumProcesses(EnumProcessProc, List);
+
+  // oranke modified
+  {
   result := EnumProcesses(
     function(const pe: TProcessEntry32): boolean
     begin
       List.Add(TProcessRec.Create(pe.th32ProcessID, pe.szExeFile));
       result := True;
     end);
+  }
 end;
 
 function CompareStringsWithMachKind(const s1, s2: string; kind: TStringMatchKind): boolean;
 begin
+  // oranke modified
   case kind of
     MATCH_STRING_WHOLE:
-      result := s1.Equals(s2);
+      result := s1 = s1;//s1.Equals(s2);
     MATCH_STRING_START:
-      result := s1.StartsWith(s2);
+      result := SysUtils.StrLComp(PChar(s1), PChar(s2), Length(s2)) = 0; //s1.StartsWith(s2);
     MATCH_STRING_END:
       result := s1.EndsWith(s2);
     MATCH_STRING_PART:
-      result := s1.Contains(s2);
+      result := System.Pos(s2, s1) > 0; //s1.Contains(s2);
   else
     result := false;
   end;
 end;
 
+type
+  PFindPIDRec = ^TFindPIDRec;
+  TFindPIDRec = record
+    tmpName: String;
+    Match: TStringMatchKind;
+    foundPID: DWORD;
+  end;
+
+function FindPIDByProcessProc(const pe: TProcessEntry32; UserData: Pointer): Boolean;
+begin
+  with PFindPIDRec(UserData)^ do
+  if CompareStringsWithMachKind(UpperCase(string(pe.szExeFile)), tmpName, Match) then
+  begin
+    foundPID := pe.th32ProcessID;
+    exit(false); // don't continue search, already found
+  end;
+
+  exit(True); // continue search
+end;
+
 function FindPIDByProcessName(const Name: string; out PID: DWORD; Match: TStringMatchKind): boolean;
 var
-  tmpName: string;
-  foundPID: DWORD;
+  //tmpName: string;
+  //foundPID: DWORD;
+  MR: TFindPIDRec;
 begin
-  tmpName := Name.ToUpper;
-  foundPID := 0;
+  MR.tmpName := UpperCase(Name);
+  MR.Match := Match;
+  MR.foundPID := 0;
 
+  //tmpName := Uppercase(Name);// Name.ToUpper;
+  //foundPID := 0;
+
+  EnumProcesses(FindPIDByProcessProc, @MR);
+
+  {
   EnumProcesses(
     function(const pe: TProcessEntry32): boolean
     begin
@@ -155,12 +205,13 @@ begin
       end;
       exit(True); // continue search
     end);
+  }
 
-  PID := foundPID;
-  result := foundPID <> 0;
+  PID := MR.foundPID;
+  result := MR.foundPID <> 0;
 end;
 
-function EnumModules(PID: DWORD; cb: TEnumModulesCallback): boolean;
+function EnumModules(PID: DWORD; cb: TEnumModulesCallback; UserData: Pointer): boolean;
 var
   hShot: THandle;
   me: TModuleEntry32;
@@ -177,7 +228,7 @@ begin
       exit(false);
 
     repeat
-      if not cb(me) then
+      if not cb(me, UserData) then
         break;
     until not Module32Next(hShot, me);
 
@@ -187,23 +238,62 @@ begin
   end;
 end;
 
+function EnumModuleToListProc(const me: TModuleEntry32; UserData: Pointer): Boolean;
+begin
+  TModuleRecList(UserData).Add(me);
+  Exit(true);
+end;
+
 function EnumModulesToList(PID: DWORD; List: TModuleRecList): boolean;
 begin
   List.Clear;
+  result := EnumModules(PID, EnumModuleToListProc, List);
+
+  {
   result := EnumModules(PID,
     function(const me: TModuleEntry32): boolean
     begin
       List.Add(me);
       exit(True);
     end);
+  }
 end;
 
-function FindModule(PID: DWORD; out value: TModuleEntry32; Checker: TFindModuleChecker): boolean;
-var
-  found: boolean;
-  tmp: TModuleEntry32;
+type
+  PFindModuleRec = ^TFindModuleRec;
+  TFindModuleRec = record
+    found: Boolean;
+    Checker: TFindModuleChecker;
+    tmp: TModuleEntry32;
+    UserData: Pointer;
+  end;
+
+function FindModuleProc(const me: TModuleEntry32; UserData: Pointer): boolean;
 begin
-  found := false;
+  with PFindModuleRec(UserData)^ do
+  if Checker(me, UserData) then
+  begin
+    tmp := me;
+    found := True;
+    exit(false);
+  end;
+  exit(True);
+end;
+
+function FindModule(PID: DWORD; out value: TModuleEntry32; Checker: TFindModuleChecker; UserData: Pointer): boolean;
+var
+  //found: boolean;
+  //tmp: TModuleEntry32;
+  FMR: TFindModuleRec;
+begin
+  FMR.found := false;
+  FMR.Checker := Checker;
+  FMR.UserData := UserData;
+
+  EnumModules(PID, FindModuleProc, @FMR);
+
+  //found := false;
+  {
   EnumModules(PID,
     function(const me: TModuleEntry32): boolean
     begin
@@ -215,17 +305,29 @@ begin
       end;
       exit(True);
     end);
+  }
 
+  with FMR do
   if found then
     value := tmp
   else
     fillchar(value, SizeOf(value), 0);
 
-  exit(found);
+  exit(FMR.found);
+end;
+
+function FindModuleByAddressProc(const me: TModuleEntry32; UserData: Pointer): Boolean;
+begin
+  result :=
+    (PNativeUInt(UserData)^ >= NativeUInt(me.modBaseAddr)) and
+    (PNativeUInt(UserData)^ < NativeUInt(me.modBaseAddr + me.modBaseSize));
 end;
 
 function FindModuleByAddress(PID: DWORD; Addr: NativeUInt; out me: TModuleEntry32): boolean;
 begin
+  result := FindModule(PID, me, FindModuleByAddressProc, @Addr);
+
+  {
   result := FindModule(PID, me,
     function(const me: TModuleEntry32): boolean
     begin
@@ -233,6 +335,12 @@ begin
         (Addr >= NativeUInt(me.modBaseAddr)) and
         (Addr < NativeUInt(me.modBaseAddr + me.modBaseSize));
     end);
+  }
+end;
+
+function FindModuleByNameProc(const me: TModuleEntry32; UserData: Pointer): Boolean;
+begin
+  Result := UpperCase(string(me.szModule)) = PString(UserData)^;
 end;
 
 function FindModuleByName(PID: DWORD; const Name: string): boolean;
@@ -240,22 +348,40 @@ var
   tmpName: string;
   me: TModuleEntry32;
 begin
+  tmpName := UpperCase(Name);
+  Result := FindModule(PID, me, FindModuleByNameProc, @tmpName);
+
+  {
   tmpName := name.ToUpper;
   result := FindModule(PID, me,
     function(const me: TModuleEntry32): boolean
     begin
       result := string(me.szModule).ToUpper.Equals(tmpName);
     end);
+  }
+end;
+
+function FindMainModuleProc(const me: TModuleEntry32; UserData: Pointer): Boolean;
+begin
+  Result := true;
 end;
 
 function FindMainModule(PID: DWORD; out me: TModuleEntry32): boolean;
 begin
+  result := FindModule(PID, me, FindMainModuleProc, nil);
+  {
   result := FindModule(PID, me,
     function(const me: TModuleEntry32): boolean
     begin
       result := True; // first module is main one
     end);
+  }
+
 end;
+
+function AdjustTokenPrivileges(TokenHandle: THandle; DisableAllPrivileges: BOOL;
+  const NewState: TTokenPrivileges; BufferLength: DWORD;
+  PreviousState: PTokenPrivileges; var ReturnLength: DWORD): BOOL; external advapi32 name 'AdjustTokenPrivileges';
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa446619(v=vs.85).aspx
 function SetPrivilege(

@@ -3,8 +3,8 @@ unit PE.Parser.Import;
 interface
 
 uses
-  System.Generics.Collections,
-  System.SysUtils,
+  Generics.Collections,
+  SysUtils,
 
   PE.Common,
   PE.Types,

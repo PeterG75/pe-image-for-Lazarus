@@ -23,7 +23,7 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  SysUtils;
 
 { TMessageMgr }
 

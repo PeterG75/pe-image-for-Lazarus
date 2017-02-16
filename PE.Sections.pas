@@ -3,9 +3,9 @@ unit PE.Sections;
 interface
 
 uses
-  System.Classes,
-  System.Generics.Collections,
-  System.SysUtils,
+  Classes,
+  Generics.Collections,
+  SysUtils,
 
   PE.Common,
   PE.Types.Sections,
@@ -15,7 +15,7 @@ type
   TPESections = class(TList<TPESection>)
   private
     FPE: TObject;
-    procedure ItemNotify(Sender: TObject; const Item: TPESection;
+    procedure ItemNotify(Sender: TObject; constref Item: TPESection;
       Action: TCollectionNotification);
   public
     constructor Create(APEImage: TObject);
@@ -183,13 +183,13 @@ var
   a, b: string;
 begin
   if IgnoreCase then
-    a := AName.ToLower
+    a := LowerCase(AName)//.ToLower
   else
     a := AName;
   for Result in self do
   begin
     if IgnoreCase then
-      b := Result.Name.ToLower
+      b := Lowercase(Result.Name)//.ToLower
     else
       b := Result.Name;
     if a = b then
@@ -198,7 +198,7 @@ begin
   Exit(nil);
 end;
 
-procedure TPESections.ItemNotify(Sender: TObject; const Item: TPESection;
+procedure TPESections.ItemNotify(Sender: TObject; constref Item: TPESection;
   Action: TCollectionNotification);
 begin
   case Action of

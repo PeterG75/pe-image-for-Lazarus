@@ -12,3 +12,17 @@ ToDo:
   Currently all section data is loaded into memory.
   Some virus samples tested can crash loading because of using too big virtual address range.
   With normal compiler generated images you won't have such problem.
+
+
+---
+
+### ... and teaks for Lazarus.
+
+Lazarus does not support anonymous functions. so I just change it to callbacks.
+This code is very dirty and terrible. You should use it at your own risk.
+
+Generic problem simply solved by "[FreePascal Generics.Collections library](https://github.com/dathox/generics.collections)".
+(Thank's for it.)
+
+And also you need "TlHelp32.pas" and "PsAPI.pas" units for build it in Lazarus.
+Copy them from Delphi src folder.

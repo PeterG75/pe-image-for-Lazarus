@@ -9,12 +9,12 @@ unit PE.ProcessModuleStream;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
+  Classes,
+  SysUtils,
 
-  WinApi.PsApi,
-  WinApi.TlHelp32,
-  WinApi.Windows,
+  PsApi,
+  TlHelp32,
+  Windows,
 
   WinHelper;
 

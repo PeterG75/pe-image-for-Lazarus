@@ -3,8 +3,8 @@ unit PE.Section;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
+  Classes,
+  SysUtils,
 
   PE.Common,
   PE.Msg,
@@ -263,7 +263,9 @@ begin
   len := Min(Length(name), IMAGE_SIZEOF_SHORT_NAME);
   if len > 0 then
     for i := 0 to len - 1 do
-      bytes[i] := byte(name.Chars[i]);
+      // oranke modified.
+      //bytes[i] := byte(name.Chars[i]);
+      bytes[i] := byte(name[i]);
 
   Result := format('%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x%2.2x', [
     bytes[0],

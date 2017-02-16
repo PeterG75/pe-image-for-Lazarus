@@ -3,8 +3,8 @@ unit PE.Parser.ImportDelayed;
 interface
 
 uses
-  System.Generics.Collections,
-  System.SysUtils,
+  Generics.Collections,
+  SysUtils,
 
   PE.Common,
   PE.Imports,

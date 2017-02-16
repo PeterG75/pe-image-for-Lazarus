@@ -6,7 +6,7 @@ uses
 {$IFDEF DEBUG}
   System.SysUtils,
 {$ENDIF}
-  System.Generics.Collections,
+  Generics.Collections,
   PE.Common,
   gRBTree;
 
@@ -146,13 +146,23 @@ begin
   result := FItems.Count;
 end;
 
+function RelocTreeCompLessFunc(const A, B: TReloc): Boolean;
+begin
+  result := A.RVA < B.RVA;
+end;
+
 constructor TRelocs.Create;
 begin
+  // oranke modified
+  FItems := TRelocTree.Create(RelocTreeCompLessFunc);
+
+{
   FItems := TRelocTree.Create(
     function(const A, B: TReloc): Boolean
     begin
       result := A.RVA < B.RVA;
     end);
+}
 end;
 
 destructor TRelocs.Destroy;

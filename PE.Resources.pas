@@ -6,9 +6,9 @@ unit PE.Resources;
 interface
 
 uses
-  System.Classes,
-  System.Generics.Collections,
-  System.SysUtils,
+  Classes,
+  Generics.Collections,
+  SysUtils,
 
   PE.Common,
   PE.Types.Resources;

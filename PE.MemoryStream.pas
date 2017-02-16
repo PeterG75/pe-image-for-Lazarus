@@ -8,8 +8,8 @@ unit PE.MemoryStream;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils;
+  Classes,
+  SysUtils;
 
 type
   TPECustomMemoryStream = class(TStream)
@@ -57,7 +57,7 @@ type
 implementation
 
 uses
-  WinApi.Windows,
+  Windows,
 
   PE.Types.DosHeader,
   PE.Types.NTHeaders;

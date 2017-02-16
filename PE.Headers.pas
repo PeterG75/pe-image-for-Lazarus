@@ -9,7 +9,7 @@ unit PE.Headers;
 interface
 
 uses
-  System.Classes;
+  Classes;
 
 type
 
@@ -122,7 +122,7 @@ type
 implementation
 
 uses
-  System.SysUtils,
+  SysUtils,
   PE.RTTI;
 
 const

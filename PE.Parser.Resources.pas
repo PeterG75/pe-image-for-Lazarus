@@ -3,7 +3,7 @@ unit PE.Parser.Resources;
 interface
 
 uses
-  System.SysUtils,
+  SysUtils,
   PE.Common,
   PE.Types,
   PE.Types.Directories,

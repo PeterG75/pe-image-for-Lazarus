@@ -3,7 +3,7 @@ unit PE.Imports.Lib;
 interface
 
 uses
-  System.Classes,
+  Classes,
 
   PE.Common,
   PE.Imports.Func;

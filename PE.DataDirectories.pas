@@ -3,8 +3,8 @@ unit PE.DataDirectories;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
+  Classes,
+  SysUtils,
 
   PE.Common,
   PE.Msg,

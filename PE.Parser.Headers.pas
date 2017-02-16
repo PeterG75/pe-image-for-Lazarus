@@ -3,7 +3,7 @@ unit PE.Parser.Headers;
 interface
 
 uses
-  System.Classes,
+  Classes,
 
   PE.Common,
   PE.Types.DOSHeader,

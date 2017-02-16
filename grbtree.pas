@@ -7,9 +7,9 @@ unit grbtree;
 interface
 
 uses
-  System.SysUtils,
-  System.Generics.Defaults,
-  System.Generics.Collections;
+  SysUtils,
+  Generics.Defaults,
+  Generics.Collections;
 
 Type
   TNodeKind = (NODE_RED, NODE_BLACK);
@@ -19,8 +19,9 @@ Type
     { Public Types }
 
   public type
-
-    TCompareLessFunc = reference to function(const A, B: T): Boolean;
+    // oranke modified.
+    //TCompareLessFunc = reference to function(const A, B: T): Boolean;
+    TCompareLessFunc = function(const A, B: T): Boolean;
 
     TRBNodePtr = ^TRBNode;
     PRBNodePtr = ^TRBNodePtr;

@@ -3,8 +3,8 @@ unit PE.COFF;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
+  Classes,
+  SysUtils,
   PE.COFF.Types;
 
 type

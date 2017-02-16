@@ -58,7 +58,7 @@ function GetDirectoryName(Index: integer): string;
 implementation
 
 uses
-  System.SysUtils;
+  SysUtils;
 
 function TImageDataDirectory.Contain(rva: uint32): boolean;
 begin

@@ -3,9 +3,9 @@ unit PE.Image;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
-  System.Generics.Collections,
+  Classes,
+  SysUtils,
+  Generics.Collections,
 
   PE.Common,
   PE.Headers,

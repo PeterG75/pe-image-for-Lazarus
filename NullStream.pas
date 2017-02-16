@@ -3,8 +3,8 @@ unit NullStream;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils;
+  Classes,
+  SysUtils;
 
 type
   TNullStream = class(TStream)

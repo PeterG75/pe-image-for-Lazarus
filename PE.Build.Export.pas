@@ -12,7 +12,7 @@ unit PE.Build.Export;
 interface
 
 uses
-  System.Classes,
+  Classes,
 
   PE.Build.Common,
   PE.Common,
@@ -30,9 +30,9 @@ type
 implementation
 
 uses
-  System.Generics.Defaults,
-  System.Generics.Collections,
-  System.SysUtils,
+  Generics.Defaults,
+  Generics.Collections,
+  SysUtils,
   PE.ExportSym,
   PE.Types.Export;
 
@@ -45,6 +45,16 @@ type
   TSyms = TList<TSym>;
 
   { TExportBuilder }
+
+
+  TSymCompare = class (TComparer<TSym>)
+    function Compare(constref a, b: TSym): Integer; override;
+  end;
+
+function TSymCompare.Compare(constref a, b: TSym): integer;
+begin
+  Result := CompareStr(a.sym.Name, b.sym.Name)
+end;
 
 procedure TExportBuilder.Build(DirRVA: UInt64; Stream: TStream);
 var
@@ -62,6 +72,8 @@ var
   nSyms: TSyms;
   nSym: TSym;
   ordinal: word;
+
+
 begin
   nSyms := TSyms.Create;
 
@@ -113,13 +125,17 @@ begin
       StreamWriteStringA(Stream, FPE.ExportedName);
 
     // Sort nSyms by names (lexicographical order) to allow binary searches.
+
+    nSyms.Sort(TSymCompare.Create);
+
+    {
     nSyms.Sort(TComparer<TSym>.Construct(
       function(const a, b: TSym): integer
       begin
         Result := CompareStr(a.sym.Name, b.sym.Name)
       end
       ));
-
+    }
     // Write names.
     for i := 0 to nSyms.Count - 1 do
     begin

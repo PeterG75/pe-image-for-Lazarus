@@ -6,8 +6,8 @@ unit PE.ExportSym;
 interface
 
 uses
-  System.Generics.Collections,
-  System.SysUtils,
+  Generics.Collections,
+  SysUtils,
   PE.Common;
 
 type
@@ -45,7 +45,10 @@ type
     FItems: TPEExportSymVec;
     // FItemsByRVA: TPEExportSymByRVA;
     function GetCount: integer;
-    procedure ExportSymNotify(Sender: TObject; const Item: TPEExportSym;
+
+    //procedure ExportSymNotify(Sender: TObject; const Item: TPEExportSym;
+      //Action: TCollectionNotification);
+    procedure ExportSymNotify(Sender: TObject; constref Item: TPEExportSym;
       Action: TCollectionNotification);
   public
     constructor Create;
@@ -180,7 +183,7 @@ begin
 end;
 
 procedure TPEExportSyms.ExportSymNotify(Sender: TObject;
-  const Item: TPEExportSym; Action: TCollectionNotification);
+  constref Item: TPEExportSym; Action: TCollectionNotification);
 begin
   if Action = cnRemoved then
     Item.Free;
